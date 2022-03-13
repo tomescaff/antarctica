@@ -130,3 +130,4 @@ dmypy.json
 
 # custom
 download/data/
+data/wisc_aws_q10_2021_12/
