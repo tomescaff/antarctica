@@ -23,7 +23,7 @@ class AWSWriter:
 
     pass
 
-class AWSReader:
+class AWSWiscReader:
     '''This class reads an AWS from a .txt file from wisc data'''
 
     def read_aws(self, filepath):
