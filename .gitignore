@@ -131,4 +131,5 @@ dmypy.json
 # custom
 .vscode
 download/data/
+displaying/data/
 data/wisc_aws_q10_2021_12/
