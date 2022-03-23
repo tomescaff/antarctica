@@ -74,3 +74,51 @@ class AWSHalleyReader:
     def resample_time_series(self, da_min):
         da = da_min.resample(time='10min', closed='right', label='right').mean()[1:-1]
         return da
+
+class AWSArgusReader:
+    '''This class reads an AWS from a .txt file from ARGUS Australian station'''
+
+    def read_aws(self, filepath):
+        aws = AWS(None, None, None, None, None)
+        varnames = ['AIR_TEMPERATURE_1M', 'AIR_TEMPERATURE_2M', 'AIR_TEMPERATURE_4M']
+        for varname in varnames:
+            da_min = self.read_time_series(filepath, varname)
+            da = self.resample_time_series(da_min)
+            aws.add_atmvar(varname, da)
+        return aws
+        
+    def read_time_series(self, filepath, varname):
+        df = pd.read_csv(filepath, sep=',')
+        time = pd.to_datetime(df['OBSERVATION_DATE'])
+        data = df[varname]
+        da_min = xr.DataArray(data, coords=[time], dims=['time']).sortby('time')
+        return da_min
+
+    def resample_time_series(self, da_min):
+        da = da_min.resample(time='10min', closed='right', label='right').mean()[1:-1]
+        return da
+
+class AWSNOAAReader:
+    '''This class reads an AWS from a .txt file from NOAA data'''
+
+    def read_aws(self, filepath):
+        aws = AWS(None, None, None, None, None)
+        varnames = ['TEMPERATURE at 2 Meters', 'TEMPERATURE at 10 Meters', 'TEMPERATURE at Tower Top']
+        varcolumns = [10, 11, 12]
+        for (n, c) in zip(varnames, varcolumns):
+            da_min = self.read_time_series(filepath, c)
+            da = self.resample_time_series(da_min)
+            aws.add_atmvar(n, da)
+        return aws
+        
+    def read_time_series(self, filepath, varcolumn):
+        df = pd.read_csv(filepath, header=None, sep='\s+', parse_dates={'datetime':[1,2,3,4,5]})
+        df['datetime'] = pd.to_datetime(df['datetime'], format='%Y %m %d %H %M')
+        time = df['datetime']
+        data = df[varcolumn]
+        da_min = xr.DataArray(data, coords=[time], dims=['time']).sortby('time')
+        return da_min
+
+    def resample_time_series(self, da_min):
+        da = da_min.resample(time='10min', closed='right', label='right').mean()[1:-1]
+        return da
