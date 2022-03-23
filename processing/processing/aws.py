@@ -1,6 +1,7 @@
 import pandas as pd
 import xarray as xr
 import re
+import numpy as np
 
 class AWS:
     '''This class represents an Automatic Weather Station and its time series'''
@@ -116,6 +117,36 @@ class AWSNOAAReader:
         df['datetime'] = pd.to_datetime(df['datetime'], format='%Y %m %d %H %M')
         time = df['datetime']
         data = df[varcolumn]
+        da_min = xr.DataArray(data, coords=[time], dims=['time']).sortby('time')
+        return da_min
+
+    def resample_time_series(self, da_min):
+        da = da_min.resample(time='10min', closed='right', label='right').mean()[1:-1]
+        return da
+
+class AWSNZReader:
+    '''This class reads an AWS from a .txt file from NZ data'''
+
+    def read_aws(self, filepath):
+        aws = AWS(None, None, None, None, None)
+        varnames = ['Air Temperature in degrees Celsius']
+        for name in varnames:
+            da_min = self.read_time_series(filepath, name)
+            da = self.resample_time_series(da_min)
+            aws.add_atmvar(name, da)
+        return aws
+        
+    def read_time_series(self, filepath, name):
+        parsedict = {'datetime': [' Year Month Day Hour Minutes in YYYY.2',
+                          'MM.2',
+                          'DD.2',
+                          'HH24.2',
+                          'MI format in Universal coordinated time']}
+        df = pd.read_csv(filepath, sep=',', low_memory=False, parse_dates=parsedict)
+        df['datetime'] = pd.to_datetime(df['datetime'], format='%Y %m %d %H %M')
+        time = df['datetime']
+        data_str = df[name]
+        data = data_str.apply(lambda x: float(x.strip()) if x.strip() != '' else np.nan)
         da_min = xr.DataArray(data, coords=[time], dims=['time']).sortby('time')
         return da_min
 

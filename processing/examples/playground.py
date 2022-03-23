@@ -1,10 +1,12 @@
 import pandas as pd
+import numpy as np
 import xarray as xr
 import re 
 import sys
+
 sys.path.append('../')
 
-from processing.aws import AWS, AWSHalleyReader, AWSArgusReader, AWSNOAAReader
+from processing.aws import AWS, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader
 
 basepath = '../../data/data_extra/'
 filename = 'halley_2021-12-04.txt'
@@ -24,6 +26,10 @@ filepath = basepath + filename
 
 aws = AWSNOAAReader().read_aws(filepath)
 
+basepath = '../../data/nz/'
+filename = 'HD01D_Data_300000_55510079157.txt'
+filepath = basepath + filename
 
+aws = AWSNZReader().read_aws(filepath)
 
 
