@@ -11,12 +11,11 @@ class AWS:
         self.lat = lat
         self.lon = lon
         self.elev = elev 
+        self.atmvar = dict()
 
-    def set_real_time_series(self, time_series_dataarray):
-        self.real_time_series = time_series_dataarray
+    def add_atmvar(self, name, time_series_dataarray):
+        self.atmvar[name] = time_series_dataarray
 
-    def set_mod_time_series(self, time_series_dataarray):
-        self.mod_time_series = time_series_dataarray
 
 class AWSWriter:
     '''This class is responsible for saving a group of AWS as a .csv file'''
@@ -28,8 +27,8 @@ class AWSWiscReader:
 
     def read_aws(self, filepath):
         aws = self.read_metadata(filepath)
-        df = self.read_time_series(filepath)
-        aws.set_real_time_series(df)
+        da = self.read_time_series(filepath)
+        aws.add_atmvar('T2m', da)
         return aws
 
     def read_metadata(self, filepath):

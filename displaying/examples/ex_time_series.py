@@ -16,7 +16,7 @@ aws_reader = AWSWiscReader()
 aws = aws_reader.read_aws(filepath)
 
 # get the original time series
-temp = aws.real_time_series
+temp = aws.atmvar['T2m']
 
 # select period near eclipse
 temp_sel = temp.sel(time=slice('2021-12-03 00:00:00', '2021-12-04 20:00:00'))

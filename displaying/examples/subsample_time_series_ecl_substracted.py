@@ -15,7 +15,7 @@ aws = data[code]['aws']
 ini = dt.datetime.fromisoformat(data[code]['ini_eclipse'])
 mae = dt.datetime.fromisoformat(data[code]['max_eclipse'])
 end = dt.datetime.fromisoformat(data[code]['end_eclipse'])
-temp = aws.real_time_series
+temp = aws.atmvar['T2m']
 
 # artificial extension of end time eclipse
 ext = end + dt.timedelta(0,60*30)

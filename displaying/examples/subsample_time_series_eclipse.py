@@ -14,7 +14,7 @@ aws = data[code]['aws']
 ini = datetime.fromisoformat(data[code]['ini_eclipse'])
 mae = datetime.fromisoformat(data[code]['max_eclipse'])
 end = datetime.fromisoformat(data[code]['end_eclipse'])
-temp = aws.real_time_series
+temp = aws.atmvar['T2m']
 
 # select period of time series near eclipse
 temp_sel = temp.sel(time=slice('2021-12-03 00:00:00', '2021-12-04 20:00:00'))
