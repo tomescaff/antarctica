@@ -132,6 +132,8 @@ dmypy.json
 .vscode
 download/data/
 displaying/data/
+processing/data/
 data/wisc_aws_q10_2021_12/
 data/data_extra/
 data/nz/
+data/output/
