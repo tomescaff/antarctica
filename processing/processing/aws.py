@@ -73,7 +73,7 @@ class AWSHalleyReader:
         return da_min
 
     def resample_time_series(self, da_min):
-        da = da_min.resample(time='10min', closed='right', label='right').mean()[1:-1]
+        da = da_min.resample(time='10min', closed='right', label='right', skipna=True).mean()[1:-1]
         return da
 
 class AWSArgusReader:
@@ -91,12 +91,12 @@ class AWSArgusReader:
     def read_time_series(self, filepath, varname):
         df = pd.read_csv(filepath, sep=',')
         time = pd.to_datetime(df['OBSERVATION_DATE'])
-        data = df[varname]
+        data = df[varname].replace(0, np.nan)
         da_min = xr.DataArray(data, coords=[time], dims=['time']).sortby('time')
         return da_min
 
     def resample_time_series(self, da_min):
-        da = da_min.resample(time='10min', closed='right', label='right').mean()[1:-1]
+        da = da_min.resample(time='10min', closed='right', label='right', skipna=True).mean()[1:-1]
         return da
 
 class AWSNOAAReader:
@@ -121,7 +121,7 @@ class AWSNOAAReader:
         return da_min
 
     def resample_time_series(self, da_min):
-        da = da_min.resample(time='10min', closed='right', label='right').mean()[1:-1]
+        da = da_min.resample(time='10min', closed='right', label='right', skipna=True).mean()[1:-1]
         return da
 
 class AWSNZReader:
@@ -151,5 +151,5 @@ class AWSNZReader:
         return da_min
 
     def resample_time_series(self, da_min):
-        da = da_min.resample(time='10min', closed='right', label='right').mean()[1:-1]
+        da = da_min.resample(time='10min', closed='right', label='right', skipna=True).mean()[1:-1]
         return da
