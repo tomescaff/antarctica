@@ -6,7 +6,7 @@ from scipy.interpolate import interp1d
 from scipy import interpolate
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('../../data/output/antarctica_aws.csv', sep=',', index_col=0, na_values=-9999)
+df = pd.read_csv('../../../antarctica_data/output/antarctica_aws.csv', sep=',', index_col=0, na_values=-9999)
 
 df_header = df.loc[:'QA']
 df_data = df.loc['2021-12-03 00:00:00':].astype(float)
@@ -201,4 +201,4 @@ for col in columns:
 df = df.reindex(index_header + index_new + index_data)
 df = df.fillna(value = -9999)
 df = df.replace(-9999.00, '-9999')
-df.to_csv('../../data/output/antarctica_aws_dtobs.csv', sep=',')
+df.to_csv('../../../antarctica_data/output/antarctica_aws_dtobs.csv', sep=',')
