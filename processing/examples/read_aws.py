@@ -4,7 +4,7 @@ import sys
 sys.path.append('../')
 from processing.aws import AWS, AWSWiscReader
 
-filepaths = sorted(glob.glob('../../data/wisc_aws_q10_2021_12/*.txt'))
+filepaths = sorted(glob.glob('../../../antarctica_data/wisc_aws_q10_2021_12/*.txt'))
 
 aws_reader = AWSWiscReader()
 aws_list = [ aws_reader.read_aws(filepath) for filepath in filepaths]

@@ -6,10 +6,7 @@ sys.path.append('../../processing/')
 from processing.aws import AWS, AWSWiscReader
 
 # select the filepath with data from wisc aws
-filepath = '../../data/wisc_aws_q10_2021_12/jas202112q10.txt'
-#filepath = '../../data/wisc_aws_q10_2021_12/kth202112q10.txt'
-#filepath = '../../data/wisc_aws_q10_2021_12/byd202112q10.txt'
-#filepath = '../../data/wisc_aws_q10_2021_12/lda202112q10.txt'
+filepath = '../../../antarctica_data/wisc_aws_q10_2021_12/jas202112q10.txt'
 
 # read the file to aws station object
 aws_reader = AWSWiscReader()
@@ -28,10 +25,13 @@ time_pos_eclipse = datetime(2021, 12, 4, 8, 24, 46, 2) # 08:24:46.2
 
 # plot the data
 fig = plt.figure(figsize=(12,6))
+
 # red rectangle during eclipse
 plt.gca().axvspan(time_pre_eclipse, time_pos_eclipse, alpha=0.2, color='red')
+
 # red vertical line in eclipse 
 plt.axvline(time_eclipse, lw=0.8, c='r')
+
 # plot original temperature time series
 plt.plot(temp_sel.time, temp_sel.values, lw=0.8, c='k')
 plt.xlabel('Time (UTC)')

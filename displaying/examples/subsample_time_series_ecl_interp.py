@@ -113,5 +113,5 @@ plt.title(f"Name: {aws.name}    Code: {aws.code}    Lat: {aws.lat}    Lon: {aws.
           loc='left',
           fontdict = {'fontsize':11})
 # save figure
-plt.savefig('../data/interp_time_series_with_eclipse/'+code+'.png', dpi=350)
+plt.savefig('../../../antarctica_data/displaying/interp_time_series_with_eclipse/'+code+'.png', dpi=350)
 plt.show()
