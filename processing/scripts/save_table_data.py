@@ -4,7 +4,7 @@ import sys
 
 sys.path.append('../')
 
-df_header = pd.read_csv('../data/antarctica_aws_header.csv', index_col=0)
+df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header.csv', index_col=0)
 
 from processing.aws import AWS, AWSWiscReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader
 
@@ -13,7 +13,7 @@ index = pd.date_range('2021-12-03 00:00:00', '2021-12-04 23:50:00', freq='10min'
 df_data = pd.DataFrame(index = index, columns=columns)
 
 # add data from wisconsin aws
-filepaths = sorted(glob.glob('../../data/wisc_aws_q10_2021_12/*.txt'))
+filepaths = sorted(glob.glob('../../../antarctica_data/wisc_aws_q10_2021_12/*.txt'))
 aws_reader = AWSWiscReader()
 aws_list = [aws_reader.read_aws(filepath) for filepath in filepaths]
 
@@ -25,7 +25,7 @@ for aws in aws_list:
     df_data.loc[time,code]=data
 
 # add data from BOM aws
-filepaths = sorted(glob.glob('../../data/nz/*.txt'))
+filepaths = sorted(glob.glob('../../../antarctica_data/nz/*.txt'))
 stn_codes = ['DAV', 'MAW', 'MAI', 'CAS', 'DWW']
 
 aws_reader = AWSNZReader()
@@ -39,7 +39,7 @@ for aws, stn_code in zip(aws_list, stn_codes):
     df_data.loc[time,code]=data
 
 # add data from BAS aws
-filepaths = sorted(glob.glob('../../data/data_extra/*2021-12-04.txt'))
+filepaths = sorted(glob.glob('../../../antarctica_data/data_extra/*2021-12-04.txt'))
 stn_codes = ['HAL', 'ROT']
 
 aws_reader = AWSHalleyReader()
@@ -59,7 +59,7 @@ for aws, stn_code in zip(aws_list, stn_codes):
     df_data.loc[time,code]=data
 
 # add data from NOAA aws
-basepath = '../../data/data_extra/'
+basepath = '../../../antarctica_data/data_extra/'
 filename = 'met_spo_insitu_1_obop_minute_2021_12.txt'
 filepath = basepath + filename
 aws = AWSNOAAReader().read_aws(filepath)
@@ -83,7 +83,7 @@ time = series.time.values
 df_data.loc[time,code]=data
 
 # add data from AAP aws
-basepath = '../../data/data_extra/'
+basepath = '../../../antarctica_data/data_extra/'
 filename = 'aws_1minute_20211201-20211206_DOME_ARGUS_Australia.csv'
 filepath = basepath + filename
 aws = AWSArgusReader().read_aws(filepath)
@@ -108,15 +108,15 @@ df_data.loc[time,code]=data
 
 df_data = df_data.round(2)
 df_data = df_data.fillna(value = -9999)
-df_data.to_csv('../data/antarctica_aws_data.csv', sep=',', float_format='%.2f')
+df_data.to_csv('../../../antarctica_data/antarctica_aws_data.csv', sep=',', float_format='%.2f')
 
 
 
 # create table with data and metadata
-df_data = pd.read_csv('../data/antarctica_aws_data.csv', index_col=0)
+df_data = pd.read_csv('../../../antarctica_data/antarctica_aws_data.csv', index_col=0)
 df_data = df_data.replace(-9999.00, '-9999')
 df = df_header.append(df_data)
 df.index.name = 'Code'
-df.to_csv('../../data/output/antarctica_aws.csv', sep=',')
+df.to_csv('../../../antarctica_data/output/antarctica_aws.csv', sep=',')
 
 

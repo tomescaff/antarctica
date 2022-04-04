@@ -17,7 +17,7 @@ def to_num_elev(str_elev):
     return float(str_elev[:-1])
 
 
-filepaths = sorted(glob.glob('../../data/wisc_aws_q10_2021_12/*.txt'))
+filepaths = sorted(glob.glob('../../../antarctica_data/wisc_aws_q10_2021_12/*.txt'))
 
 aws_reader = AWSWiscReader()
 aws_list = [ aws_reader.read_aws(filepath) for filepath in filepaths]
@@ -46,7 +46,7 @@ for aws in aws_list:
     df[code] = [stn_code, stn_name, num_lat, num_lon, num_elev, institution, var_code, var_name, var_hgt]
 
 df.index.name = 'Code'
-df.to_csv('../data/table_wisc.csv', sep=';')
+df.to_csv('../../../antarctica_data/processing/table_wisc.csv', sep=';')
 
 
-df2 = pd.read_csv('../data/table_wisc.csv', sep=';', index_col=0)
+df2 = pd.read_csv('../../../antarctica_data/processing/table_wisc.csv', sep=';', index_col=0)
