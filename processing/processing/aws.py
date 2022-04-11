@@ -2,6 +2,7 @@ import pandas as pd
 import xarray as xr
 import re
 import numpy as np
+import datetime as dt
 
 class AWS:
     '''This class represents an Automatic Weather Station and its time series'''
@@ -167,8 +168,9 @@ class AWSGUReader:
     def read_time_series(self, filepath):
         df = pd.read_csv(filepath, sep=',', header = None, skiprows=21207)
         time = pd.date_range('2021-12-02 23:50:00','2021-12-04 12:19:40', freq='5s')
+        time = time + dt.timedelta(seconds=60*60*3)
         data = df[6]
-        da_5sec = xr.DataArray(data, coords=[time], dims=['time'])
+        da_5sec = xr.DataArray(data.values, coords=[time.values], dims=['time'])
         return da_5sec
 
     def resample_time_series(self, da_5sec):
@@ -195,6 +197,7 @@ class AWSEFMReader:
 
         time_str = year + '-' + month + '-' + day + ' ' + hhmm + ':00'
         time = pd.to_datetime(time_str, format='%Y-%m-%d %H:%M:%S')
+        # time = time + dt.timedelta(seconds=60*60*3)
         data = df[10]
         da_min = xr.DataArray(data, coords=[time], dims=['time'])
         return da_min
