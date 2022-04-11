@@ -108,12 +108,12 @@ df_data.loc[time,code]=data
 
 df_data = df_data.round(2)
 df_data = df_data.fillna(value = -9999)
-df_data.to_csv('../../../antarctica_data/antarctica_aws_data.csv', sep=',', float_format='%.2f')
+df_data.to_csv('../../../antarctica_data/processing/antarctica_aws_data.csv', sep=',', float_format='%.2f')
 
 
 
 # create table with data and metadata
-df_data = pd.read_csv('../../../antarctica_data/antarctica_aws_data.csv', index_col=0)
+df_data = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_data.csv', index_col=0)
 df_data = df_data.replace(-9999.00, '-9999')
 df = df_header.append(df_data)
 df.index.name = 'Code'
