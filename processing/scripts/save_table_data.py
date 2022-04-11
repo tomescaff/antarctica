@@ -6,7 +6,7 @@ sys.path.append('../')
 
 df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header_ext.csv', index_col=0)
 
-from processing.aws import AWS, AWSWiscReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader, AWSGUReader
+from processing.aws import AWS, AWSWiscReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader, AWSGUReader, AWSEFMReader
 
 columns = df_header.columns.tolist()
 index = pd.date_range('2021-12-03 00:00:00', '2021-12-04 23:50:00', freq='10min')
@@ -106,13 +106,25 @@ data = series.values
 time = series.time.values
 df_data.loc[time,code]=data
 
-#add data from GU was
+#add data from GU aws
 basepath = '../../../antarctica_data/GU/'
 filename = 'data_5sec_con_nuevo_sensor.txt'
 filepath = basepath + filename
 aws = AWSGUReader().read_aws(filepath)
 
 code = 'GU_Temp'
+series = aws.atmvar['T2m'].sel(time=slice('2021-12-03 00:00:00', '2021-12-04 23:50:00'))
+data = series.values
+time = series.time.values
+df_data.loc[time,code]=data
+
+#add data from EFM aws
+basepath = '../../../antarctica_data/EFM/'
+filename = 'estacion_EFM_3_4_dic_2021.csv'
+filepath = basepath + filename
+aws = AWSEFMReader().read_aws(filepath)
+
+code = 'EFM_Temp'
 series = aws.atmvar['T2m'].sel(time=slice('2021-12-03 00:00:00', '2021-12-04 23:50:00'))
 data = series.values
 time = series.time.values

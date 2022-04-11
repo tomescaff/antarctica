@@ -6,7 +6,7 @@ import sys
 
 sys.path.append('../')
 
-from processing.aws import AWS, AWSGUReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader, AWSGUReader
+from processing.aws import AWS, AWSGUReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader, AWSGUReader, AWSEFMReader
 
 # basepath = '../../../antarctica_data/data_extra/'
 # filename = 'halley_2021-12-04.txt'
@@ -32,8 +32,14 @@ from processing.aws import AWS, AWSGUReader, AWSHalleyReader, AWSArgusReader, AW
 
 # aws = AWSNZReader().read_aws(filepath)
 
-basepath = '../../../antarctica_data/GU/'
-filename = 'data_5sec_con_nuevo_sensor.txt'
+# basepath = '../../../antarctica_data/GU/'
+# filename = 'data_5sec_con_nuevo_sensor.txt'
+# filepath = basepath + filename
+
+# aws = AWSGUReader().read_aws(filepath)
+
+basepath = '../../../antarctica_data/EFM/'
+filename = 'estacion_EFM_3_4_dic_2021.csv'
 filepath = basepath + filename
 
-aws = AWSGUReader().read_aws(filepath)
+aws = AWSEFMReader().read_aws(filepath)

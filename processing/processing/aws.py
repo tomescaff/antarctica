@@ -175,6 +175,35 @@ class AWSGUReader:
         da = da_5sec.resample(time='10min', closed='right', label='right', skipna=True).mean()[1:-1]
         return da
 
+class AWSEFMReader:
+    '''This class read an AWS file from Eduardo Frei Montalva station data'''
+
+    def read_aws(self, filepath):
+        aws = AWS(None, None, None, None, None)
+        da_min = self.read_time_series(filepath)
+        da = self.resample_time_series(da_min)
+        aws.add_atmvar('T2m', da)
+        return aws
+
+    def read_time_series(self, filepath):
+        df = pd.read_csv(filepath, sep = ',', header=None)
+
+        year = df[0].astype(str)
+        month = df[1].astype(str)
+        day = df[2].apply(lambda x: '0'+str(x))
+        hhmm = df[3]
+
+        time_str = year + '-' + month + '-' + day + ' ' + hhmm + ':00'
+        time = pd.to_datetime(time_str, format='%Y-%m-%d %H:%M:%S')
+        data = df[10]
+        da_min = xr.DataArray(data, coords=[time], dims=['time'])
+        return da_min
+
+    def resample_time_series(self, da_min):
+        da = da_min.resample(time='10min', closed='right', label='right', skipna=True).mean()[1:-1]
+        return da
+
+
     
 
     
