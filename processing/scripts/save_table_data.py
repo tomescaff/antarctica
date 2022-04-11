@@ -4,9 +4,9 @@ import sys
 
 sys.path.append('../')
 
-df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header.csv', index_col=0)
+df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header_ext.csv', index_col=0)
 
-from processing.aws import AWS, AWSWiscReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader
+from processing.aws import AWS, AWSWiscReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader, AWSGUReader
 
 columns = df_header.columns.tolist()
 index = pd.date_range('2021-12-03 00:00:00', '2021-12-04 23:50:00', freq='10min')
@@ -106,11 +106,22 @@ data = series.values
 time = series.time.values
 df_data.loc[time,code]=data
 
+#add data from GU was
+basepath = '../../../antarctica_data/GU/'
+filename = 'data_5sec_con_nuevo_sensor.txt'
+filepath = basepath + filename
+aws = AWSGUReader().read_aws(filepath)
+
+code = 'GU_Temp'
+series = aws.atmvar['T2m'].sel(time=slice('2021-12-03 00:00:00', '2021-12-04 23:50:00'))
+data = series.values
+time = series.time.values
+df_data.loc[time,code]=data
+
+# create table with data
 df_data = df_data.round(2)
 df_data = df_data.fillna(value = -9999)
 df_data.to_csv('../../../antarctica_data/processing/antarctica_aws_data.csv', sep=',', float_format='%.2f')
-
-
 
 # create table with data and metadata
 df_data = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_data.csv', index_col=0)

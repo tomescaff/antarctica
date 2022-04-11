@@ -153,3 +153,28 @@ class AWSNZReader:
     def resample_time_series(self, da_min):
         da = da_min.resample(time='10min', closed='right', label='right', skipna=True).mean()[1:-1]
         return da
+
+class AWSGUReader:
+    '''This class read an AWS from data_5sec_con_nuevo_sensor.txt file from Glaciar Union data'''
+
+    def read_aws(self, filepath):
+        aws = AWS(None, None, None, None, None)
+        da_5sec = self.read_time_series(filepath)
+        da = self.resample_time_series(da_5sec)
+        aws.add_atmvar('T2m', da)
+        return aws
+
+    def read_time_series(self, filepath):
+        df = pd.read_csv(filepath, sep=',', header = None, skiprows=21207)
+        time = pd.date_range('2021-12-02 23:50:00','2021-12-04 12:19:40', freq='5s')
+        data = df[6]
+        da_5sec = xr.DataArray(data, coords=[time], dims=['time'])
+        return da_5sec
+
+    def resample_time_series(self, da_5sec):
+        da = da_5sec.resample(time='10min', closed='right', label='right', skipna=True).mean()[1:-1]
+        return da
+
+    
+
+    
