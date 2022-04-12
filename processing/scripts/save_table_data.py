@@ -4,7 +4,7 @@ import sys
 
 sys.path.append('../')
 
-df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header_ext.csv', index_col=0)
+df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header_ext_qa.csv', index_col=0)
 
 from processing.aws import AWS, AWSWiscReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader, AWSGUReader, AWSEFMReader
 
