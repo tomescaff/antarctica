@@ -34,8 +34,9 @@ ds['time'] = pd.to_datetime(ds['time'])
 
 columns = list(ds.keys())
 
-col = 'GU_Temp'
-
+col = 'JAS_Temp'
+smooth_parm = 1
+nhours=1.0
 # get times of eclipse from dataframe
 l = len('08:55:56') # some random time
 ini = dt.datetime.fromisoformat('2021-12-04 ' + df.loc['Start of partial eclipse', col][:l])
@@ -43,7 +44,7 @@ mae = dt.datetime.fromisoformat('2021-12-04 ' + df.loc['Maximum eclipse', col][:
 end = dt.datetime.fromisoformat('2021-12-04 ' + df.loc['End of partial eclipse', col][:l])
 
 # artificial extension of end time eclipse  
-ext = end + dt.timedelta(0,60*30) # 30 min
+ext = end + dt.timedelta(0,60*60*nhours) # 30 min
 
 # get time series
 temp = ds[col]
@@ -87,7 +88,7 @@ x_data_nonan = x_data[~np.isnan(y_data)]
 y_data_nonan = y_data[~np.isnan(y_data)]
 
 # compute x data where interpolation will happen
-bool_time_eclipse_ext = (temp.time >=  np.datetime64(ini - dt.timedelta(0,60*60*10))) & (temp.time <= np.datetime64(ext + dt.timedelta(0,60*60*4)))
+bool_time_eclipse_ext = (temp.time >=  np.datetime64(ini - dt.timedelta(0,60*60*10))) & (temp.time <= np.datetime64(ext + dt.timedelta(0,60*60*10)))
 x_data_interp = x_data[bool_time_eclipse_ext]
 time_interp = temp.time.where(bool_time_eclipse_ext, drop=True)
 
@@ -100,7 +101,7 @@ f_interp_spline = interpolate.splrep(x_data_nonan, y_data_nonan, s=0, k=3)
 y_interp_spline = interpolate.splev(x_data_interp, f_interp_spline, der=0)
 
 # perform cubic spline smoothing
-f_smooth_spline = interpolate.splrep(x_data_nonan, y_data_nonan, s=15, k=3)
+f_smooth_spline = interpolate.splrep(x_data_nonan, y_data_nonan, s=smooth_parm, k=3)
 y_smooth_spline = interpolate.splev(x_data_interp, f_smooth_spline, der=0)
 
 # calculate the max DT during eclipse (not extended eclipse)
