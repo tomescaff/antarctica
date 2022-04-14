@@ -4,7 +4,7 @@ import sys
 
 sys.path.append('../')
 
-df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header_ext_qa.csv', index_col=0)
+df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header_ext_qa_bestparms.csv', index_col=0)
 
 from processing.aws import AWS, AWSWiscReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader, AWSGUReader, AWSEFMReader
 
@@ -106,7 +106,7 @@ data = series.values
 time = series.time.values
 df_data.loc[time,code]=data
 
-#add data from GU aws
+# add data from GU aws
 basepath = '../../../antarctica_data/GU/'
 filename = 'data_5sec_con_nuevo_sensor.txt'
 filepath = basepath + filename
@@ -118,7 +118,7 @@ data = series.values
 time = series.time.values
 df_data.loc[time,code]=data
 
-#add data from EFM aws
+# add data from EFM aws
 basepath = '../../../antarctica_data/EFM/'
 filename = 'estacion_EFM_3_4_dic_2021.csv'
 filepath = basepath + filename
