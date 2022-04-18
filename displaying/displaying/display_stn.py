@@ -6,37 +6,32 @@ from scipy.interpolate import interp1d
 from scipy import interpolate
 import matplotlib.pyplot as plt
 
+##################################################################
+# select input parameters 
+col = 'JAS_Temp' # code for station and atmvar
+smooth_parm = 1 # smoothing parameter
+nhours=1.0 # extra time for computing interpolation
+delta_hours_left = 10 # define starting time of interpolated data
+delta_hours_right = 10 # define ending time of interpolated data
+##################################################################
+
+
+# read table base from csv
 df = pd.read_csv('../../../antarctica_data/output/antarctica_aws.csv', sep=',', index_col=0, na_values=-9999)
 
+# select header section
 df_header = df.loc[:'QA']
+
+# select data section
 df_data = df.loc['2021-12-03 00:00:00':].astype(float)
 df_data.index.name='time'
 
-index_header = df_header.index.tolist()
-index_data = df_data.index.tolist()
-index_new = ['ini error', 
-             'ext error', 
-             'int error', 
-             'ecl error',
-             'DTmax 3hrs lineal', 
-             'DTmax 3hrs spline interp', 
-             'DTmax 3hrs spline smooth',
-             'DTecl 3hrs lineal',
-             'DTecl 3hrs spline interp',
-             'DTecl 3hrs spline smooth', 
-             'Discrete time eclipse',
-             'Argmax 3hrs lineal', 
-             'Argmax 3hrs spline interp', 
-             'Argmax 3hrs spline smooth',]
-
+# create xarray dataset
 ds = xr.Dataset.from_dataframe(df_data)
 ds['time'] = pd.to_datetime(ds['time'])
 
 columns = list(ds.keys())
 
-col = 'JAS_Temp'
-smooth_parm = 1
-nhours=1.0
 # get times of eclipse from dataframe
 l = len('08:55:56') # some random time
 ini = dt.datetime.fromisoformat('2021-12-04 ' + df.loc['Start of partial eclipse', col][:l])
@@ -72,9 +67,9 @@ df.loc['int error', col] = int_error
 ecl_error = temp.sel(time='2021-12-04 ' + df.loc['Maximum eclipse', col][:l], method='nearest').isnull().values
 df.loc['ecl error', col] = ecl_error
 
-
-
+############################
 # starting interpolation
+############################
 
 # set nan data during eclipse
 temp_mod = temp.where((temp.time < np.datetime64(ini)) | (temp.time > np.datetime64(ext)))
@@ -88,7 +83,7 @@ x_data_nonan = x_data[~np.isnan(y_data)]
 y_data_nonan = y_data[~np.isnan(y_data)]
 
 # compute x data where interpolation will happen
-bool_time_eclipse_ext = (temp.time >=  np.datetime64(ini - dt.timedelta(0,60*60*10))) & (temp.time <= np.datetime64(ext + dt.timedelta(0,60*60*10)))
+bool_time_eclipse_ext = (temp.time >=  np.datetime64(ini - dt.timedelta(0,60*60*delta_hours_left))) & (temp.time <= np.datetime64(ext + dt.timedelta(0,60*60*delta_hours_right)))
 x_data_interp = x_data[bool_time_eclipse_ext]
 time_interp = temp.time.where(bool_time_eclipse_ext, drop=True)
 
@@ -116,27 +111,32 @@ dsmooth = (smooth-origin).where(((origin.time >= np.datetime64(ini)) & (origin.t
 
 round_float = lambda x: round(float(x.values), 2)
 
-df.loc['DTmax 3hrs lineal', col] = round_float(dlineal)
-df.loc['DTmax 3hrs spline interp', col] = round_float(dinterp)
-df.loc['DTmax 3hrs spline smooth', col] = round_float(dsmooth)
+df.loc['DTmax '+str(nhours)+'hrs lineal', col] = round_float(dlineal)
+df.loc['DTmax '+str(nhours)+'hrs spline interp', col] = round_float(dinterp)
+df.loc['DTmax '+str(nhours)+'hrs spline smooth', col] = round_float(dsmooth)
 
 # calculate the time at which max DT occurs
 calc_time = lambda x: x.time[(x-origin).argmax()].values
 to_str = lambda t: pd.to_datetime(t).strftime('%H:%M:%S')
 
-df.loc['Argmax 3hrs lineal', col] = to_str(calc_time(lineal))
-df.loc['Argmax 3hrs spline interp', col] = to_str(calc_time(interp))
-df.loc['Argmax 3hrs spline smooth', col] = to_str(calc_time(smooth))
+df.loc['Argmax '+str(nhours)+'hrs lineal', col] = to_str(calc_time(lineal))
+df.loc['Argmax '+str(nhours)+'hrs spline interp', col] = to_str(calc_time(interp))
+df.loc['Argmax '+str(nhours)+'hrs spline smooth', col] = to_str(calc_time(smooth))
 
 # calculate eclipse DT
 temp_ecl = temp.sel(time='2021-12-04 ' + df.loc['Maximum eclipse', col][:l], method='nearest')
 time_ecl = temp_ecl.time
-df.loc['DTecl 3hrs lineal', col] = round_float((lineal-origin).sel(time=time_ecl))
-df.loc['DTecl 3hrs spline interp', col] = round_float((interp-origin).sel(time=time_ecl))
-df.loc['DTecl 3hrs spline smooth', col] = round_float((smooth-origin).sel(time=time_ecl))
+df.loc['DTecl '+str(nhours)+'hrs lineal', col] = round_float((lineal-origin).sel(time=time_ecl))
+df.loc['DTecl '+str(nhours)+'hrs spline interp', col] = round_float((interp-origin).sel(time=time_ecl))
+df.loc['DTecl '+str(nhours)+'hrs spline smooth', col] = round_float((smooth-origin).sel(time=time_ecl))
 df.loc['Discrete time eclipse', col] = to_str(time_ecl.values)
 
-# plot the data
+print(df.loc[:,col])
+
+#######################
+# plotting the data
+#######################
+
 fig = plt.figure(figsize=(12,6))
 
 # plot red rectangle during eclipse
@@ -153,7 +153,7 @@ plt.plot(time_interp, y_lineal, lw=0.8, c='g', label=f'lineal\nDT={dlineal.value
 plt.plot(time_interp, y_interp_spline, lw=0.8, c='brown', label=f'Cubic spline interp (s=0, k=3)\nDT={dinterp.values:.2f}')
 
 # plot smooth curve
-plt.plot(time_interp, y_smooth_spline, lw=0.8, c='b', label=f'Cubic spline smooth (s=15, k=3)\nDT={dsmooth.values:.2f}')
+plt.plot(time_interp, y_smooth_spline, lw=0.8, c='b', label=f'Cubic spline smooth (s={smooth_parm}, k=3)\nDT={dsmooth.values:.2f}')
 
 # plot original temperature time series
 plt.plot(temp.time, temp.values, lw=0.8, c='k', label='Original')
