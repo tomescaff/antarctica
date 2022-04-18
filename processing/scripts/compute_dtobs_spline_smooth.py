@@ -6,14 +6,18 @@ from scipy.interpolate import interp1d
 from scipy import interpolate
 import matplotlib.pyplot as plt
 
+# read table base from csv
 df = pd.read_csv('../../../antarctica_data/output/antarctica_aws.csv', sep=',', index_col=0, na_values=-9999)
 
+# select header section
 df_header = df.loc[:'QA']
+
+# select data section
 df_data = df.loc['2021-12-03 00:00:00':].astype(float)
 df_data.index.name='time'
 
+# prepare index for output table
 mins = np.arange(0, 210, 10)
-
 index_header = df_header.index.tolist()
 index_data = df_data.index.tolist()
 index_new = ['ini error', 
@@ -22,15 +26,13 @@ index_new = ['ini error',
              'ecl error']
 index_new += ["DTmax {} min spline smooth".format(ext_min) for ext_min in mins]
 
+# create xarray dataset
 ds = xr.Dataset.from_dataframe(df_data)
 ds['time'] = pd.to_datetime(ds['time'])
 
 columns = list(ds.keys())
 
 for col in columns:
-
-    #if col not in ['CDN_Temp']:
-    #    continue
 
     # get times of eclipse from dataframe
     l = len('08:55:56') # some random time
@@ -64,7 +66,9 @@ for col in columns:
     ecl_error = temp.sel(time='2021-12-04 ' + df.loc['Maximum eclipse', col][:l], method='nearest').isnull().values
     df.loc['ecl error', col] = ecl_error
 
+    ############################
     # starting interpolation
+    ############################
 
     for ext_min in mins:
     

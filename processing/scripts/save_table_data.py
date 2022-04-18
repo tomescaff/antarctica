@@ -4,11 +4,15 @@ import sys
 
 sys.path.append('../')
 
-df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header_ext_qa_bestparms.csv', index_col=0)
-
 from processing.aws import AWS, AWSWiscReader, AWSHalleyReader, AWSArgusReader, AWSNOAAReader, AWSNZReader, AWSGUReader, AWSEFMReader
 
+# read header from csv
+df_header = pd.read_csv('../../../antarctica_data/processing/antarctica_aws_header_ext_qa_bestparms.csv', index_col=0)
+
+# get columns
 columns = df_header.columns.tolist()
+
+# prepare index for data table
 index = pd.date_range('2021-12-03 00:00:00', '2021-12-04 23:50:00', freq='10min')
 df_data = pd.DataFrame(index = index, columns=columns)
 

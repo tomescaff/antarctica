@@ -6,12 +6,17 @@ from scipy.interpolate import interp1d
 from scipy import interpolate
 import matplotlib.pyplot as plt
 
+# read table base from csv
 df = pd.read_csv('../../../antarctica_data/output/antarctica_aws.csv', sep=',', index_col=0, na_values=-9999)
 
+# select header section
 df_header = df.loc[:'Best timedelta (hrs)']
+
+# select data section
 df_data = df.loc['2021-12-03 00:00:00':].astype(float)
 df_data.index.name='time'
 
+# create xarray dataset
 ds = xr.Dataset.from_dataframe(df_data)
 ds['time'] = pd.to_datetime(ds['time'])
 
@@ -19,7 +24,10 @@ columns = list(ds.keys())
 
 for col in columns:
     
-    best_s = float(df_header.loc['Best S', col])
+    # smoothing parameter
+    best_s = float(df_header.loc['Best S', col]) 
+
+    # extra time for computing interpolation
     best_dt = float(df_header.loc['Best timedelta (hrs)', col])
 
     if best_s == -9999 or np.isnan(best_s):
@@ -63,9 +71,9 @@ for col in columns:
         ecl_error = temp.sel(time='2021-12-04 ' + df.loc['Maximum eclipse', col][:l], method='nearest').isnull().values
         df.loc['ecl error', col] = ecl_error
 
-
-
+        ############################
         # starting interpolation
+        ############################
 
         # set nan data during eclipse
         temp_mod = temp.where((temp.time < np.datetime64(ini)) | (temp.time > np.datetime64(ext)))
@@ -92,22 +100,10 @@ for col in columns:
         smooth = xr.DataArray(y_smooth_spline, coords=[time_interp], dims=['time'])
         dsmooth = (smooth-origin).where(((origin.time >= np.datetime64(ini)) & (origin.time <= np.datetime64(end))), drop=True).max()
 
-        round_float = lambda x: round(float(x.values), 2)
-        df.loc['DTmax 3hrs spline smooth', col] = round_float(dsmooth)
+        #######################
+        # plotting the data
+        #######################
 
-        # calculate the time at which max DT occurs
-        calc_time = lambda x: x.time[(x-origin).argmax()].values
-        to_str = lambda t: pd.to_datetime(t).strftime('%H:%M:%S')
-
-        df.loc['Argmax 3hrs spline smooth', col] = to_str(calc_time(smooth))
-
-        # calculate eclipse DT
-        temp_ecl = temp.sel(time='2021-12-04 ' + df.loc['Maximum eclipse', col][:l], method='nearest')
-        time_ecl = temp_ecl.time
-        df.loc['DTecl 3hrs spline smooth', col] = round_float((smooth-origin).sel(time=time_ecl))
-        df.loc['Discrete time eclipse', col] = to_str(time_ecl.values)
-
-        # plot the data
         fig = plt.figure(figsize=(12,6))
 
         # plot red rectangle during eclipse
@@ -120,7 +116,7 @@ for col in columns:
         plt.axvline(mae, lw=0.8, c='r', label='Maximum eclipse')
 
         # plot smooth curve
-        plt.plot(time_interp, y_smooth_spline, lw=0.8, c='b', label=f'Cubic spline smooth (s=15, k=3)\nDT={dsmooth.values:.2f}')
+        plt.plot(time_interp, y_smooth_spline, lw=0.8, c='b', label=f'Cubic spline smooth (s={best_s}, k=3)\nDT={dsmooth.values:.2f}')
 
         # plot original temperature time series
         plt.plot(temp.time, temp.values, lw=0.8, c='k', label='Original')

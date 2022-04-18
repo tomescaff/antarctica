@@ -6,12 +6,17 @@ from scipy.interpolate import interp1d
 from scipy import interpolate
 import matplotlib.pyplot as plt
 
+# read table base from csv
 df = pd.read_csv('../../../antarctica_data/output/antarctica_aws.csv', sep=',', index_col=0, na_values=-9999)
 
+# select header section
 df_header = df.loc[:'QA']
+
+# select data section
 df_data = df.loc['2021-12-03 00:00:00':].astype(float)
 df_data.index.name='time'
 
+# prepare index for output table
 index_header = df_header.index.tolist()
 index_data = df_data.index.tolist()
 index_new = ['ini error', 
@@ -29,18 +34,13 @@ index_new = ['ini error',
              'Argmax 30min spline interp', 
              'Argmax 30min spline smooth',]
 
+# create xarray dataset
 ds = xr.Dataset.from_dataframe(df_data)
 ds['time'] = pd.to_datetime(ds['time'])
 
 columns = list(ds.keys())
 
 for col in columns:
-
-    #if col not in ['CDN_Temp']:
-    #    continue
-
-    # if col in ['D85_Temp']:
-    #     break
 
     # get times of eclipse from dataframe
     l = len('08:55:56') # some random time
@@ -80,7 +80,9 @@ for col in columns:
     if ini_error or ext_error or int_error or ecl_error:
         continue
 
+    ############################
     # starting interpolation
+    ############################
 
     # set nan data during eclipse
     temp_mod = temp.where((temp.time < np.datetime64(ini)) | (temp.time > np.datetime64(ext)))
@@ -141,62 +143,6 @@ for col in columns:
     df.loc['DTecl 30min spline interp', col] = round_float((interp-origin).sel(time=time_ecl))
     df.loc['DTecl 30min spline smooth', col] = round_float((smooth-origin).sel(time=time_ecl))
     df.loc['Discrete time eclipse', col] = to_str(time_ecl.values)
-
-    # # plot the data
-    # fig = plt.figure(figsize=(12,6))
-
-    # # plot red rectangle during eclipse
-    # plt.gca().axvspan(ini, end, alpha=0.1, color='red')
-
-    # # plot another red rectangle during the extended eclipse
-    # plt.gca().axvspan(ini, ext, alpha=0.1, color='red')
-
-    # # plot red vertical line at maximum eclipse
-    # plt.axvline(mae, lw=0.8, c='r')
-
-    # # plot interp curves
-    # plt.plot(time_interp, y_lineal, lw=0.8, c='g')
-    # plt.plot(time_interp, y_interp_spline, lw=0.8, c='brown')
-
-    # # plot smooth curve
-    # plt.plot(time_interp, y_smooth_spline, lw=0.8, c='b')
-
-    # # plot original temperature time series
-    # plt.plot(temp.time, temp.values, lw=0.8, c='k')
-
-    # plt.scatter(temp.time, temp.values,  c='b')
-
-    # # shrink current axis's height by 10% on the bottom
-    # box = plt.gca().get_position()
-    # plt.gca().set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
-
-    # # print legend with DT for each technique
-    # plt.legend(['Maximum eclipse', 
-    #             f'lineal\nDT={dlineal.values:.2f}', 
-    #             f'Cubic spline interp (s=0, k=3)\nDT={dinterp.values:.2f}', 
-    #             f'Cubic spline smooth (s=15, k=3)\nDT={dsmooth.values:.2f}', 
-    #             'Original'], 
-    #         loc='upper center', 
-    #         bbox_to_anchor=(0.5, -0.15),
-    #         fancybox=False, 
-    #         shadow=False,
-    #         frameon=False,
-    #         ncol=5)
-
-    # # rest of plotting routine
-    # plt.xlabel('Time (UTC)')
-    # plt.ylabel('Temperature (deg C)')
-    # plt.grid(ls='--', lw='0.2', c='grey')
-    # plt.gca().spines['right'].set_visible(False)
-    # plt.gca().spines['top'].set_visible(False)
-    # plt.gca().yaxis.set_ticks_position('left')
-    # plt.gca().xaxis.set_ticks_position('bottom')
-    # plt.title(f"Name: {col}",
-    #         loc='left',
-    #         fontdict = {'fontsize':11})
-    # # save figure
-    # # plt.savefig('../data/interp_time_series_with_eclipse/'+code+'.png', dpi=350)
-    # # plt.show()
 
 df = df.reindex(index_header + index_new + index_data)
 df = df.fillna(value = -9999)

@@ -197,6 +197,7 @@ class AWSEFMReader:
 
         time_str = year + '-' + month + '-' + day + ' ' + hhmm + ':00'
         time = pd.to_datetime(time_str, format='%Y-%m-%d %H:%M:%S')
+        # correct the UTC time
         # time = time + dt.timedelta(seconds=60*60*3)
         data = df[10]
         da_min = xr.DataArray(data, coords=[time], dims=['time'])
